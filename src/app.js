@@ -1,3 +1,4 @@
+require('dotenv').config()
 const { json, urlencoded } = require('body-parser')
 const cors = require('cors')
 const express = require('express')
@@ -11,6 +12,7 @@ class App {
   }
 
   middlewares() {
+    this.app.set('json spaces', 4)
     this.app.use(json())
     this.app.use(urlencoded({ extended: true }))
     this.app.use(cors())

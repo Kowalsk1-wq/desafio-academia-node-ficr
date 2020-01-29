@@ -26,14 +26,16 @@ async function getUser(name) {
     return b.size - a.size
   })
 
-  const raedyRepo = _.chunk(repositories, 3)
+  const readyRepo = _.chunk(repositories, 3)
 
   return {
     name: user.name,
-    html_url: user.html_url,
+    avatar: user.avatar_url,
+    url: user.html_url,
     bio: user.bio,
+    email: user.email,
     company: user.company,
-    repositories: [raedyRepo[0]],
+    repositories: [...readyRepo[0]],
   }
 }
 
