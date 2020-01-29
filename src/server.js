@@ -9,7 +9,7 @@ app.listen(4000, () => {
       `${figlet.textSync('API - Challenge', {
         font: 'Doom',
         horizontalLayout: 'full',
-      })} v${version}`
+      })} v${version}\n       http://localhost:4000`
     )
   )
 })
