@@ -2,14 +2,16 @@ const axios = require('axios')
 const _ = require('lodash')
 const User_URL = 'https://api.github.com/users'
 
-async function getUser(name) {
+const GbToken = require('../../config/gb')
+
+async function getUserGb(name) {
   const user_url = `${User_URL}/${name}`
   const repo_url = `${user_url}/repos`
 
   const repositories = []
 
   const gitRes = await axios.get(user_url, {
-    authorization: 'token 6735b465170e2e12ac7492679256d6380a6e7612'
+    authorization: `token ${GbToken}`,
   })
   const repos_response = await axios.get(repo_url)
 
@@ -32,16 +34,12 @@ async function getUser(name) {
 
   return {
     name: user.name,
-    avatar: user.avatar_url,
-    url: user.html_url,
     bio: user.bio,
-    email: user.email,
-    company: user.company,
-    location: user.location,
-    repositories: [...readyRepo[0]],
+    perfil: user.html_url,
+    repos: [...readyRepo[0]],
   }
 }
 
 module.exports = {
-  getUser,
+  getUserGb,
 }

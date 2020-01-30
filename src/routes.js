@@ -1,17 +1,9 @@
 const routes = require('express').Router()
 const { errorHandle } = require('./app/helpers/Error')
-const { version } = require('../package.json')
 
 const UserController = require('./app/controllers/UserController')
 
 routes
-  .get('/api/hello', (_req, res) =>
-    res.render('index', {
-      welc: 'Bem-Vindo(a)',
-      title: 'Curr1culum',
-      version: `v${version}`,
-    })
-  )
 
   .get('/api/curriculo/:format', UserController.get)
 

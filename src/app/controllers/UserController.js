@@ -1,14 +1,14 @@
-const { getUser } = require('../services/github')
+const { getUserGb } = require('../services/github')
+//const { getUserFb } = require('../services/fb')
 const pdf = require('../helpers/Pdf')
-const shl = require('shelljs')
 
 class UserController {
   async get(req, res) {
-
     const { format } = req.params
     const { name } = req.body
 
-    const gitRes = await getUser(name)
+    const gitRes = await getUserGb(name)
+    //const fbRes = await getUserFb(token)
 
     const nomeUser = gitRes.name
 
@@ -95,13 +95,13 @@ class UserController {
         <div class="secao">
           <h2>Dados Pessoais</h2>			
             <div id="hcard" class="vcard">
-              <img src="${gitRes.avatar}" class="photo"/>
+              <img src="{fbRes.url_do_profile_photo}" class="photo"/>
               <p><strong>NOME: </strong><span class="given-name">${gitRes.name}</span></p>
-              <p><strong>EMAIL: </strong><span class="email">${gitRes.email}</span></p>
-              <p><strong>GITHUB: </strong><span class="url">${gitRes.url}</span></p>
+              <p><strong>EMAIL: </strong><span class="email">{email}</span></p>
+              <p><strong>GITHUB: </strong><span class="url">${gitRes.perfil}</span></p>
             
               <div class="adr">
-                <p><strong>LOCATION: </strong><span class="locality">${gitRes.location}</span></p>
+                <p><strong>LOCATION: </strong><span class="locality">Recife, Pernambuco</span></p>
               </div>
             </div>
         </div>
@@ -109,7 +109,7 @@ class UserController {
         <div class="secao">
           <h2>Dados Profissionais</h2>
           
-          <p><label>Empresa</label>${gitRes.company}</p>
+          <p><label>Empresa</label>{company}</p>
         </div>
 
         <div class="secao">
@@ -121,12 +121,23 @@ class UserController {
       </html>
     `
 
-     let pathPdf = ''
+    let pathPdf = ''
 
     if (!gitRes) return res.json({ err: 'Não Achei!' })
     else {
       if (format === 'json') {
-        return res.json({ github_profile: gitRes })
+        return res.json({
+          nome: gitRes.name,
+          //data_nascimento: fbRes.birthday,
+          //endereco: fbRes.local,
+          //email: fbRes.email,
+          //genero: fbRes.gender,
+          bio: gitRes.bio,
+          github: {
+            perfil: gitRes.perfil,
+            alguns_repositorios: gitRes.repos,
+          },
+        })
       } else if (format === 'pdf') {
         pdf
           .create(content, {})
@@ -136,11 +147,12 @@ class UserController {
               if (err) console.log('UM ERRO ACONTECEU!!', err)
               else {
                 pathPdf = res.filename
-                console.log(pathPdf)
               }
             }
           )
-          return res.send(`Arquivo ${nameSplit[0].toLowerCase()}_cv.pdf foi baixado com sucesso!\nEle se encontra em: ${pathPdf}`)
+        return res.send(
+          `Arquivo ${nameSplit[0].toLowerCase()}_cv.pdf foi baixado com sucesso!\nEle se encontra em: ${pathPdf}`
+        )
       } else {
         return res.status(500).json({ err: 'Formato Inválido' })
       }
