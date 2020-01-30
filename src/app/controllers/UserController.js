@@ -1,8 +1,11 @@
 const { getUser } = require('../services/github')
 const pdf = require('../helpers/Pdf')
+const shl = require('shelljs')
 
 class UserController {
   async get(req, res) {
+
+    const { format } = req.params
     const { name } = req.body
 
     const gitRes = await getUser(name)
@@ -98,10 +101,7 @@ class UserController {
               <p><strong>GITHUB: </strong><span class="url">${gitRes.url}</span></p>
             
               <div class="adr">
-                <span class="locality">Ponta Grossa</span>
-              , 
-                <span class="region">Paraná</span>
-
+                <p><strong>LOCATION: </strong><span class="locality">${gitRes.location}</span></p>
               </div>
             </div>
         </div>
@@ -121,15 +121,30 @@ class UserController {
       </html>
     `
 
-    pdf
-      .create(content, {})
-      .toFile(`./src/cvs/${nameSplit[0].toLowerCase()}_cv.pdf`, (err, res) => {
-        if (err) console.log('UM ERRO ACONTECEU!!', err)
-        else console.log(res)
-      })
+     let pathPdf = ''
 
     if (!gitRes) return res.json({ err: 'Não Achei!' })
-    else return res.json({ github_profile: gitRes })
+    else {
+      if (format === 'json') {
+        return res.json({ github_profile: gitRes })
+      } else if (format === 'pdf') {
+        pdf
+          .create(content, {})
+          .toFile(
+            `./src/cvs/${nameSplit[0].toLowerCase()}_cv.pdf`,
+            (err, res) => {
+              if (err) console.log('UM ERRO ACONTECEU!!', err)
+              else {
+                pathPdf = res.filename
+                console.log(pathPdf)
+              }
+            }
+          )
+          return res.send(`Arquivo ${nameSplit[0].toLowerCase()}_cv.pdf foi baixado com sucesso!\nEle se encontra em: ${pathPdf}`)
+      } else {
+        return res.status(500).json({ err: 'Formato Inválido' })
+      }
+    }
   }
 }
 

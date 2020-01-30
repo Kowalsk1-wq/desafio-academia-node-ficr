@@ -13,7 +13,7 @@ routes
     })
   )
 
-  .get('/api/curriculo/', UserController.get)
+  .get('/api/curriculo/:format', UserController.get)
 
   // Qualquer Outra Passada!!
   .get('/*', (_req, res) => res.status(404).render('404'))

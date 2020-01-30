@@ -8,7 +8,9 @@ async function getUser(name) {
 
   const repositories = []
 
-  const gitRes = await axios.get(user_url)
+  const gitRes = await axios.get(user_url, {
+    authorization: 'token 6735b465170e2e12ac7492679256d6380a6e7612'
+  })
   const repos_response = await axios.get(repo_url)
 
   const user = gitRes.data
@@ -35,6 +37,7 @@ async function getUser(name) {
     bio: user.bio,
     email: user.email,
     company: user.company,
+    location: user.location,
     repositories: [...readyRepo[0]],
   }
 }
