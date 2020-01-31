@@ -33,6 +33,7 @@ async function getUserGb(name) {
   const readyRepo = _.chunk(repositories, 3)
 
   return {
+    photo: user.avatar_url,
     name: user.name,
     bio: user.bio,
     perfil: user.html_url,

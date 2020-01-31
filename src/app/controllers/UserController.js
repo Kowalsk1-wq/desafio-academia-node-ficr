@@ -1,29 +1,32 @@
 const { getUserGb } = require('../services/github')
-//const { getUserFb } = require('../services/fb')
+const { getUserFb } = require('../services/fb')
 const pdf = require('../helpers/Pdf')
+
+const { formation } = require('../db/formation')
+const { xp: xps } = require('../db/xp')
+
+const frm = []
+const xpcs = []
+
+for (let form of formation) {
+  frm.push(form)
+}
+
+for (let xp of xps) {
+  xpcs.push(xp)
+}
 
 class UserController {
   async get(req, res) {
-    const { format } = req.params
+    const format = req.query.format
     const { name } = req.body
 
     const gitRes = await getUserGb(name)
-    //const fbRes = await getUserFb(token)
+    const fbRes = await getUserFb()
 
     const nomeUser = gitRes.name
 
     const nameSplit = nomeUser.split(' ')
-
-    let repo = []
-
-    gitRes.repositories.map(r => {
-      repo.push({
-        name: r.name,
-        url: r.url,
-      })
-    })
-
-    console.log(repo)
 
     const content = `
       <!DOCTYPE HTML>
@@ -95,9 +98,11 @@ class UserController {
         <div class="secao">
           <h2>Dados Pessoais</h2>			
             <div id="hcard" class="vcard">
-              <img src="{fbRes.url_do_profile_photo}" class="photo"/>
-              <p><strong>NOME: </strong><span class="given-name">${gitRes.name}</span></p>
-              <p><strong>EMAIL: </strong><span class="email">{email}</span></p>
+              <img 
+                src="https://scontent.fudi1-1.fna.fbcdn.net/v/t1.0-9/p960x960/78419994_158835822020808_1410896589232275456_o.jpg?_nc_cat=104&_nc_ohc=0QxuAaq67xMAX-Hphhd&_nc_ht=scontent.fudi1-1.fna&_nc_tp=6&oh=2dbcaa860afe569bf1ff0b3a591f437b&oe=5ED63872" 
+                class="photo" />
+              <p><strong>NOME: </strong><span class="given-name">${fbRes.name}</span></p>
+              <p><strong>EMAIL: </strong><span class="email">${fbRes.email}</span></p>
               <p><strong>GITHUB: </strong><span class="url">${gitRes.perfil}</span></p>
             
               <div class="adr">
@@ -107,9 +112,8 @@ class UserController {
         </div>
 
         <div class="secao">
-          <h2>Dados Profissionais</h2>
-          
-          <p><label>Empresa</label>{company}</p>
+          <h2>Experiência Profissional</h2>
+          <div id="hcard" class="vcard"></div>
         </div>
 
         <div class="secao">
@@ -121,41 +125,47 @@ class UserController {
       </html>
     `
 
-    let pathPdf = ''
-
-    if (!gitRes) return res.json({ err: 'Não Achei!' })
-    else {
-      if (format === 'json') {
-        return res.json({
-          nome: gitRes.name,
-          //data_nascimento: fbRes.birthday,
-          //endereco: fbRes.local,
-          //email: fbRes.email,
-          //genero: fbRes.gender,
-          bio: gitRes.bio,
-          github: {
-            perfil: gitRes.perfil,
-            alguns_repositorios: gitRes.repos,
-          },
-        })
-      } else if (format === 'pdf') {
-        pdf
-          .create(content, {})
-          .toFile(
-            `./src/cvs/${nameSplit[0].toLowerCase()}_cv.pdf`,
-            (err, res) => {
-              if (err) console.log('UM ERRO ACONTECEU!!', err)
-              else {
-                pathPdf = res.filename
+    try {
+      if (!gitRes) return res.json({ err: 'Não Achei!' })
+      else {
+        if (format === 'json') {
+          return res.json({
+            nome: gitRes.name,
+            data_nascimento: fbRes.birthday,
+            endereco: fbRes.local,
+            email: fbRes.email,
+            genero: fbRes.gender === 'male' ? 'Masculino' : 'Feminino',
+            bio: gitRes.bio,
+            foto: fbRes.url,
+            formacao: [...frm],
+            experiencia_profissional: [...xpcs],
+            github: {
+              perfil: gitRes.perfil,
+              alguns_repositorios: gitRes.repos,
+            },
+          })
+        } else if (format === 'pdf') {
+          pdf
+            .create(content, {})
+            .toFile(
+              `./src/cvs/${nameSplit[0].toLowerCase()}_cv.pdf`,
+              (err, res) => {
+                if (err) console.log('UM ERRO ACONTECEU!!', err)
               }
-            }
+            )
+          return res.send(
+            `Arquivo ${nameSplit[0].toLowerCase()}_cv.pdf foi baixado com sucesso!`
           )
-        return res.send(
-          `Arquivo ${nameSplit[0].toLowerCase()}_cv.pdf foi baixado com sucesso!\nEle se encontra em: ${pathPdf}`
-        )
-      } else {
-        return res.status(500).json({ err: 'Formato Inválido' })
+        } else {
+          return res.status(401).json({
+            status: 401,
+            err: 'Você Digitou Um Formato Inválido',
+            msg: `O formato ${format} não existe no nosso sistema`,
+          })
+        }
       }
+    } catch (error) {
+      console.error('Deu Ruim!!', error)
     }
   }
 }

@@ -2,10 +2,11 @@ const routes = require('express').Router()
 const { errorHandle } = require('./app/helpers/Error')
 
 const UserController = require('./app/controllers/UserController')
+//const qs = require('querystring')
 
 routes
 
-  .get('/api/curriculo/:format', UserController.get)
+  .get('/api/curriculo', UserController.get)
 
   // Qualquer Outra Passada!!
   .get('/*', (_req, res) => res.status(404).render('404'))
