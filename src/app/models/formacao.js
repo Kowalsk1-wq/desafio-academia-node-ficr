@@ -1,4 +1,4 @@
-exports.formation = [
+exports.formacao = [
   {
     instituicao: 'FICR',
     curso: 'ADS',

@@ -1,4 +1,4 @@
-exports.xp = [
+exports.experiencia = [
   {
     empresa: 'MMoveis Planejados',
     funcao: 'Ajudante De Marcenaria e Designer de Móveis',
