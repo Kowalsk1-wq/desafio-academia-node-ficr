@@ -125,47 +125,39 @@ class UserController {
       </html>
     `
 
-    try {
-      if (!gitRes) return res.json({ err: 'Não Achei!' })
-      else {
-        if (format === 'json') {
-          return res.json({
-            nome: gitRes.name,
-            data_nascimento: fbRes.birthday,
-            endereco: fbRes.local,
-            email: fbRes.email,
-            genero: fbRes.gender === 'male' ? 'Masculino' : 'Feminino',
-            bio: gitRes.bio,
-            foto: fbRes.url,
-            formacao: [...frm],
-            experiencia_profissional: [...xpcs],
-            github: {
-              perfil: gitRes.perfil,
-              alguns_repositorios: gitRes.repos,
-            },
-          })
-        } else if (format === 'pdf') {
-          pdf
-            .create(content, {})
-            .toFile(
-              `./src/cvs/${nameSplit[0].toLowerCase()}_cv.pdf`,
-              (err, res) => {
-                if (err) console.log('UM ERRO ACONTECEU!!', err)
-              }
-            )
-          return res.send(
-            `Arquivo ${nameSplit[0].toLowerCase()}_cv.pdf foi baixado com sucesso!`
+    if (!gitRes) return res.json({ err: 'Não Achei!' })
+    else {
+      if (format === 'json') {
+        return res.json({
+          nome: gitRes.name,
+          data_nascimento: fbRes.birthday,
+          endereco: fbRes.local,
+          email: fbRes.email,
+          genero: fbRes.gender === 'male' ? 'Masculino' : 'Feminino',
+          bio: gitRes.bio,
+          foto: fbRes.url,
+          formacao: [...frm],
+          experiencia_profissional: [...xpcs],
+          github: {
+            perfil: gitRes.perfil,
+            alguns_repositorios: gitRes.repos,
+          },
+        })
+      } else if (format === 'pdf') {
+        pdf
+          .create(content, {})
+          .toFile(
+            `./src/cvs/${nameSplit[0].toLowerCase()}_cv.pdf`,
+            (err, res) => {
+              if (err) console.log('UM ERRO ACONTECEU!!', err)
+            }
           )
-        } else {
-          return res.status(401).json({
-            status: 401,
-            err: 'Você Digitou Um Formato Inválido',
-            msg: `O formato ${format} não existe no nosso sistema`,
-          })
-        }
+        return res.send(
+          `Arquivo ${nameSplit[0].toLowerCase()}_cv.pdf foi baixado com sucesso!`
+        )
+      } else {
+        return res.status(401).json({ err: 'Formato Inválido' })
       }
-    } catch (error) {
-      console.error('Deu Ruim!!', error)
     }
   }
 }
